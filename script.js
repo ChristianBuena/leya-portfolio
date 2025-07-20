@@ -9,6 +9,8 @@ class BlackBookController {
   constructor() {
     this.pages = [...document.querySelectorAll('.book__page')];
     this.currentPage = 0;
+    this.updatePageDisplay(0);
+    this.updateButtonStates();
     this.totalPages = this.pages.length;
     this.isAnimating = false;
     this.isMobile = window.innerWidth <= 768;
@@ -17,13 +19,25 @@ class BlackBookController {
     this.currentPageDisplay = document.querySelector('.current-page');
     this.totalPagesDisplay = document.querySelector('.total-pages');
     
+    // Debug: Log all pages in order
+    console.log('Pages array:', this.pages.map((page, index) => ({
+      index,
+      pageId: page.getAttribute('data-page-id') || 'no-id',
+      classes: page.className
+    })));
+    
+    // Instructions elements
+    this.instructionsOverlay = document.getElementById('instructionsOverlay');
+    this.mainInstruction = document.getElementById('mainInstruction');
+    this.glossaryInstruction = document.getElementById('glossaryInstruction');
+    
     this.init();
     this.setupScrollAnimations();
     this.setupMobileNavigation();
     this.setupFlyingContent();
     this.handleResponsiveDisplay();
     
-    // Initialize background transition
+    // Initialize background transition and instructions
     this.initBackgroundTransition();
   }
 
@@ -33,16 +47,30 @@ class BlackBookController {
     
     // Add handler for scroll events to detect when book is opened
     window.addEventListener('scroll', () => {
+      // Track current page for desktop
+      if (!this.isMobile) {
+        const scrollPosition = window.scrollY;
+        const pageHeight = window.innerHeight * 0.25;
+        const currentPageFromScroll = Math.floor(scrollPosition / pageHeight);
+        
+        if (currentPageFromScroll !== this.currentPage && this.pages[currentPageFromScroll]) {
+          const pageId = this.pages[currentPageFromScroll].getAttribute('data-page-id') || 'unknown';
+          this.updateInstructionsBasedOnPage(pageId);
+        }
+      }
+      
       // If we're past the cover page (first page) and book hasn't been opened yet
       if (window.scrollY > window.innerHeight * 0.25 && !this.bookOpened) {
         document.body.classList.add('book-open');
         document.querySelector('.background-overlay').classList.add('active');
+        this.hideInstructions();
         this.bookOpened = true;
       } 
       // If we go back to the cover and book was open
       else if (window.scrollY < window.innerHeight * 0.15 && this.bookOpened) {
         document.body.classList.remove('book-open');
         document.querySelector('.background-overlay').classList.remove('active');
+        this.showInstructions();
         this.bookOpened = false;
       }
     });
@@ -53,13 +81,51 @@ class BlackBookController {
         if (pageIndex > 0 && !this.bookOpened) {
           document.body.classList.add('book-open');
           document.querySelector('.background-overlay').classList.add('active');
+          this.hideInstructions();
           this.bookOpened = true;
         } else if (pageIndex === 0 && this.bookOpened) {
           document.body.classList.remove('book-open');
           document.querySelector('.background-overlay').classList.remove('active');
+          this.showInstructions();
           this.bookOpened = false;
         }
+        
+        // Update instructions based on page
+        if (this.pages[pageIndex]) {
+          const pageId = this.pages[pageIndex].getAttribute('data-page-id') || 'unknown';
+          this.updateInstructionsBasedOnPage(pageId);
+        }
       };
+    }
+    
+    // Initialize page tracking for glossary instructions
+    this.currentPageId = 'cover';
+    this.updateInstructionsBasedOnPage('cover');
+  }
+
+  showInstructions() {
+    if (this.instructionsOverlay) {
+      this.instructionsOverlay.classList.remove('hidden');
+    }
+  }
+
+  hideInstructions() {
+    if (this.instructionsOverlay) {
+      this.instructionsOverlay.classList.add('hidden');
+    }
+  }
+
+  updateInstructionsBasedOnPage(pageId) {
+    if (!this.instructionsOverlay) return;
+    
+    this.currentPageId = pageId;
+    
+    if (pageId === 'contents') {
+      // Show glossary instruction when on contents page
+      this.glossaryInstruction.classList.add('show');
+    } else {
+      // Hide glossary instruction on other pages
+      this.glossaryInstruction.classList.remove('show');
     }
   }
 
@@ -251,17 +317,36 @@ class BlackBookController {
     });
   }
 
+  // Define page mapping for consistent navigation
+  getPageMapping() {
+    return [
+      { arrayIndex: 0, displayNumber: 0, pageId: 'cover', text: 'Cover' },
+      { arrayIndex: 1, displayNumber: 1, pageId: 'contents', text: 'Contents' },
+      { arrayIndex: 2, displayNumber: 2, pageId: 'about-me', text: 'About Me' },
+      { arrayIndex: 3, displayNumber: 3, pageId: 'my-journey', text: 'My Journey' },
+      { arrayIndex: 4, displayNumber: 4, pageId: 'skills', text: 'Skills' },
+      { arrayIndex: 5, displayNumber: 5, pageId: 'projects', text: 'Projects' },
+      { arrayIndex: 6, displayNumber: 6, pageId: 'web-development', text: 'Web Development' },
+      { arrayIndex: 7, displayNumber: 7, pageId: 'design-portfolio', text: 'Design Portfolio' },
+      { arrayIndex: 8, displayNumber: 8, pageId: 'achievements', text: 'Achievements' },
+      { arrayIndex: 9, displayNumber: 9, pageId: 'testimonials', text: 'Testimonials' },
+      { arrayIndex: 10, displayNumber: 10, pageId: 'contact-links', text: 'Contact & Links' }
+      // Additional pages can be added here
+    ];
+  }
+
   showFlyingGlossary() {
     const glossaryData = [
-      { text: 'About Me', page: '3', pageId: 'about-me' },
-      { text: 'My Journey', page: '5', pageId: 'my-journey' },
-      { text: 'Skills', page: '7', pageId: 'skills' },
-      { text: 'Projects', page: '9', pageId: 'projects' },
-      { text: 'Web Development', page: '11', pageId: 'web-development' },
-      { text: 'Design Portfolio', page: '13', pageId: 'design-portfolio' },
-      { text: 'Achievements', page: '15', pageId: 'achievements' },
-      { text: 'Testimonials', page: '17', pageId: 'testimonials' },
-      { text: 'Contact & Links', page: '19', pageId: 'contact-links' }
+      { text: 'Contents', page: '1', pageId: 'contents' },
+      { text: 'About Me', page: '2', pageId: 'about-me' },
+      { text: 'My Journey', page: '3', pageId: 'my-journey' },
+      { text: 'Skills', page: '4', pageId: 'skills' },
+      { text: 'Projects', page: '5', pageId: 'projects' },
+      { text: 'Web Development', page: '6', pageId: 'web-development' },
+      { text: 'Design Portfolio', page: '7', pageId: 'design-portfolio' },
+      { text: 'Achievements', page: '8', pageId: 'achievements' },
+      { text: 'Testimonials', page: '9', pageId: 'testimonials' },
+      { text: 'Contact & Links', page: '10', pageId: 'contact-links' }
     ];
 
     const flyingHtml = `
@@ -1175,13 +1260,22 @@ class BlackBookController {
   }
 
   navigateToPageById(targetPageId) {
-    // Find the page with the matching data-page-id
-    const targetPage = document.querySelector(`[data-page-id="${targetPageId}"]`);
-    if (!targetPage) return;
+    // Find the page with the matching data-page-id using our page mapping
+    const pageMapping = this.getPageMapping();
+    const mappedPage = pageMapping.find(p => p.pageId === targetPageId);
+    
+    if (!mappedPage) {
+      // Fallback to original method if page not in mapping
+      const targetPage = document.querySelector(`[data-page-id="${targetPageId}"]`);
+      if (!targetPage) return;
+      const targetPageIndex = this.pages.indexOf(targetPage);
+      if (targetPageIndex === -1) return;
+      this.navigateToPage(targetPageIndex);
+      return;
+    }
 
-    // Get the page index from the pages array
-    const targetPageIndex = this.pages.indexOf(targetPage);
-    if (targetPageIndex === -1) return;
+    // Use the mapped page index
+    const targetPageIndex = mappedPage.arrayIndex;
 
     if (this.isMobile && !this.isAnimating) {
       // For mobile, use the existing goToPage method
@@ -1292,19 +1386,19 @@ class BlackBookController {
 
   setupMobileNavigation() {
     if (this.isMobile && this.prevBtn && this.nextBtn) {
-      // Set total pages display
+      // Set total pages display (keep original total of 22)
       this.totalPagesDisplay.textContent = this.totalPages;
       
-      // Handle previous button
       this.prevBtn.addEventListener('click', () => {
         if (this.currentPage > 0) {
+          console.log(`Prev button: navigating from ${this.currentPage} to ${this.currentPage - 1}`);
           this.goToPage(this.currentPage - 1);
         }
       });
-      
-      // Handle next button
+
       this.nextBtn.addEventListener('click', () => {
         if (this.currentPage < this.totalPages - 1) {
+          console.log(`Next button: navigating from ${this.currentPage} to ${this.currentPage + 1}`);
           this.goToPage(this.currentPage + 1);
         }
       });
@@ -1321,29 +1415,64 @@ class BlackBookController {
     this.isAnimating = true;
     this.currentPage = pageIndex;
     
-    // Animate pages to target position
+    // Debug: log navigation
+    const pageId = this.pages[pageIndex]?.getAttribute('data-page-id') || 'unknown';
+    console.log(`Navigating to page ${pageIndex}: ${pageId}`);
+    
+    // Update instructions based on current page
+    if (this.pages[pageIndex]) {
+      const pageId = this.pages[pageIndex].getAttribute('data-page-id') || 'unknown';
+      this.updateInstructionsBasedOnPage(pageId);
+    }
+    
+    // Use the same logic as desktop scroll navigation
+    console.log(`\n=== NAVIGATING TO PAGE ${pageIndex} (SIMPLIFIED LOGIC) ===`);
     this.pages.forEach((page, index) => {
-      if (index <= pageIndex) {
-        // Pages that should be flipped (rotated 180 degrees)
+      if (index < pageIndex) {
+        // Pages before current page - should be flipped and behind
+        const zValue = -index - 1;
+        const pageId = page.getAttribute('data-page-id') || 'unknown';
+        console.log(`Page ${index} (${pageId}): before current, z=${zValue}, rotateY=-180`);
         to(page, {
           rotateY: -180,
-          z: -index - 1,
-          duration: 0.8,
+          z: zValue,
+          duration: 1.5,
+          ease: "power2.inOut"
+        });
+      } else if (index === pageIndex) {
+        // Current page - should be on top and visible (flipped or not depending on page)
+        const zValue = this.totalPages + 100; // Ensure it's on top
+        const pageId = page.getAttribute('data-page-id') || 'unknown';
+        const rotateValue = pageIndex === 0 ? 0 : -180; // Cover stays at 0, others at -180
+        console.log(`Page ${index} (${pageId}): CURRENT PAGE, z=${zValue}, rotateY=${rotateValue} [ON TOP]`);
+        to(page, {
+          rotateY: rotateValue,
+          z: zValue,
+          duration: 1.5,
           ease: "power2.inOut"
         });
       } else {
-        // Pages that should remain unflipped (at 0 degrees)
+        // Pages after current page - should be unflipped and stacked
+        const zValue = this.totalPages - index;
+        const pageId = page.getAttribute('data-page-id') || 'unknown';
+        console.log(`Page ${index} (${pageId}): after current, z=${zValue}, rotateY=0`);
         to(page, {
           rotateY: 0,
-          z: this.totalPages - index,
-          duration: 0.8,
+          z: zValue,
+          duration: 1.5,
           ease: "power2.inOut"
         });
       }
     });
+    console.log(`=== END NAVIGATION ===\n`);
     
     setTimeout(() => {
       this.isAnimating = false;
+      
+      // Call the page change callback
+      if (this.onPageChange) {
+        this.onPageChange(pageIndex);
+      }
     }, 800);
     
     // Update display and button states
@@ -1358,7 +1487,26 @@ class BlackBookController {
 
   updatePageDisplay(pageIndex) {
     if (this.currentPageDisplay) {
-      this.currentPageDisplay.textContent = pageIndex + 1;
+      // Use the page mapping to get consistent display numbers
+      const pageMapping = this.getPageMapping();
+      const mappedPage = pageMapping.find(p => p.arrayIndex === pageIndex);
+      
+      let displayNumber;
+      if (mappedPage) {
+        displayNumber = mappedPage.displayNumber;
+      } else {
+        // Fallback for pages beyond the mapped ones
+        displayNumber = pageIndex;
+      }
+      
+      this.currentPageDisplay.textContent = displayNumber;
+      
+      // Debug log
+      if (this.pages[pageIndex]) {
+        const pageId = this.pages[pageIndex].getAttribute('data-page-id') || 'no-id';
+        const mappedPageName = mappedPage ? mappedPage.text : 'Unknown';
+        console.log(`Displaying Page ${displayNumber}/22: ${pageId} (${mappedPageName})`);
+      }
     }
   }
 
@@ -1375,6 +1523,12 @@ class BlackBookController {
   updateCurrentPage(pageIndex) {
     if (pageIndex !== this.currentPage) {
       this.currentPage = pageIndex;
+      
+      // Get the current page element to extract page ID
+      if (this.pages[pageIndex]) {
+        const pageId = this.pages[pageIndex].getAttribute('data-page-id') || 'unknown';
+        this.updateInstructionsBasedOnPage(pageId);
+      }
     }
   }
 }
