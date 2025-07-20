@@ -14,6 +14,18 @@
 </head>
 <body>
   <div class="background-overlay"></div>
+  
+  <!-- Instructions Overlay -->
+  <div class="instructions-overlay" id="instructionsOverlay">
+    <div class="instruction-text" id="mainInstruction">
+      <span class="desktop-instruction">Scroll to flip pages on desktop.</span>
+      <span class="mobile-instruction">Use the arrow buttons on mobile.</span>
+    </div>
+    <div class="instruction-text glossary-instruction" id="glossaryInstruction">
+      Click any page to show more content
+    </div>
+  </div>
+  
   <div class="book">
         <div class="book__spine"></div>
         
@@ -400,7 +412,7 @@
             </svg>
         </button>
         <div class="page-info">
-            <span class="current-page">1</span> / <span class="total-pages">21</span>
+            <span class="current-page">0</span> / <span class="total-pages">21</span>
         </div>
         <button class="nav-btn nav-btn--next" id="nextBtn">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -422,5 +434,14 @@
     </div>
 
     <script src="script.js"></script>
+    <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Page Order Check:', Array.from(document.querySelectorAll('.book__page')).map((page, idx) => ({
+      index: idx,
+      pageId: page.getAttribute('data-page-id') || 'no-id',
+      cssIndex: page.style.getPropertyValue('--page-index')
+    })));
+  });
+</script>
 </body>
 </html>
