@@ -1,0 +1,2075 @@
+/* CSS Variables for Black Book */
+:root {
+  --page-count: 20;
+  --page-scroll: 25;
+  --underline: hsl(0, 0%, 100%);
+  --spine: hsl(0, 0%, 7%);
+  --cover: hsl(0, 0%, 0%);
+  --bg: hsl(0, 0%, 0%);
+  --insert: hsl(0, 0%, 95%);
+  --page: hsl(0, 0%, 100%);
+  --text-color: hsl(0, 0%, 30%);
+}
+
+/* Reset and Base Styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  width: 100vw;
+  height: calc(((var(--page-count) + 2) * var(--page-scroll)) * 1vh);
+  background: var(--bg);
+  overflow-x: hidden;
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  color: var(--text-color);
+  transition: background-color 1.5s ease;
+}
+
+body.book-open {
+  background-color: hsl(0, 0%, 15%); /* Dark gray background when book is open */
+}
+
+/* Background transition styles */
+.background-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 100%);
+  opacity: 0;
+  transition: opacity 2s ease;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.background-overlay.active {
+  opacity: 1;
+}
+
+/* Typography */
+h1, h2, h3 {
+  margin: 0;
+  padding: 0;
+  color: var(--text-color);
+}
+
+/* Core page styling */
+.page {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.page__number {
+  position: absolute;
+  color: hsl(0, 0%, 40%);
+  bottom: 1rem;
+  font-size: 1vmin;
+  font-family: Arial, sans-serif;
+}
+
+.page__half--front .page__number {
+  right: 1rem;
+}
+
+.page__half--back .page__number {
+  left: 1rem;
+}
+
+.page__half {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  transform: rotateY(calc(var(--rotation) * 1deg)) translate3d(0, 0, calc((0.5 * var(--coefficient)) * 1px));
+  -webkit-clip-path: inset(0 0.5% 0 0.5%);
+  clip-path: inset(0 0.5% 0 0.5%);
+}
+
+.page__half--front {
+  --rotation: 0;
+  --coefficient: 0;
+  backface-visibility: hidden;
+  border-radius: 0 5% 5% 0;
+}
+
+.page__half--back {
+  --rotation: 180;
+  --coefficient: 2;
+  border-radius: 5% 0 0 5%;
+}
+
+/* Book Styles */
+.book {
+  height: 60vmin;
+  position: fixed;
+  width: 45vmin;
+  min-width: 250px;
+  min-height: 350px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  transform-style: preserve-3d;
+  perspective: 1200px;
+}
+
+.book__insert {
+  content: '';
+  position: absolute;
+  height: 94%;
+  width: 94%;
+  background: var(--insert);
+  top: 50%;
+  right: -1rem;
+  transform: translate(0, -50%);
+  border-radius: 5% 0 0 5%;
+}
+
+.book__spine {
+  height: 100%;
+  left: 0;
+  top: 0;
+  position: absolute;
+  background: var(--spine);
+  transform-origin: 0 50%;
+  width: 12px;
+  transform: translate3d(0, 0, -13px) scaleX(1) rotateY(0deg);
+}
+
+.book__page {
+  position: absolute;
+  left: 2%;
+  top: 50%;
+  border-radius: 0 5% 5% 0;
+  transform: translate(0, -50%);
+  height: 94%;
+  width: 94%;
+  z-index: calc(((var(--page-count) + 2) - var(--page-index)) * 2);
+  transform-origin: 0% 50%;
+}
+
+.book__cover {
+  border-radius: 0 5% 5% 0;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  background: var(--cover);
+}
+
+.book__cover--front {
+  transform-origin: 0 50%;
+}
+
+.book__cover--front .page__half--back {
+  border-right: 1rem solid var(--spine);
+}
+
+.book__cover--back {
+  transform-origin: 0% 50%;
+}
+
+.book__cover--back .page__half--front {
+  border-left: 1rem solid var(--spine);
+}
+
+.book__cover--back .book__insert {
+  left: 0;
+  border-radius: 0 5% 5% 0;
+}
+
+.book__page:not(.book__cover) .page__half {
+  background: repeating-linear-gradient(0deg, transparent 0 1rem, var(--underline) 1rem calc(1rem + 1px), transparent calc(1rem + 1px)) 0 1rem / 100% 100% no-repeat, var(--page);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .book {
+    height: 70vmin;
+    width: 50vmin;
+    transform: translate(-50%, -50%) scale(1.0);
+  }
+}
+
+/* Smooth transitions */
+@media (prefers-reduced-motion: no-preference) {
+  .page__half {
+    transition: transform 0.6s ease;
+  }
+}
+
+/* Cover Design Styles */
+.cover__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  text-align: center;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.cover__icon {
+  margin-bottom: 2rem;
+}
+
+.hero-icon {
+  width: 3rem;
+  height: 3rem;
+  color: hsl(0, 0%, 100%);
+  stroke-width: 1.2;
+}
+
+.cover__title {
+  font-family: 'Special Elite', 'Courier Prime', monospace;
+  font-size: 2.2rem;
+  font-weight: 400;
+  color: hsl(0, 0%, 100%);
+  margin: 0 0 0.8rem 0;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  text-transform: lowercase;
+}
+
+.cover__subtitle {
+  font-family: 'Courier Prime', 'Special Elite', monospace;
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: hsl(0, 0%, 100%);
+  margin: 0;
+  letter-spacing: 0.1em;
+  text-transform: lowercase;
+  opacity: 0.9;
+}
+
+/* Responsive cover text */
+@media (max-width: 768px) {
+  .hero-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  
+  .cover__title {
+    font-size: 1.8rem;
+  }
+  
+  .cover__subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .cover__content {
+    padding: 1.5rem;
+  }
+  
+  .cover__icon {
+    margin-bottom: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-icon {
+    width: 2rem;
+    height: 2rem;
+  }
+  
+  .cover__title {
+    font-size: 1.5rem;
+  }
+  
+  .cover__subtitle {
+    font-size: 0.8rem;
+  }
+  
+  .cover__content {
+    padding: 1rem;
+  }
+  
+  .cover__icon {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Glossary/Table of Contents Styles */
+.glossary-content {
+  padding: 2rem 2rem 1.5rem 2rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.glossary-title {
+  font-family: 'Special Elite', 'Courier Prime', monospace;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: #a28a62;
+  margin: 0 0 1.2rem 0;
+  text-align: center;
+  text-transform: lowercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #a28a62;
+  padding-bottom: 0.3rem;
+}
+
+.glossary-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  justify-content: space-evenly;
+}
+
+.glossary-item {
+  display: flex;
+  align-items: center;
+  font-family: 'Courier Prime', 'Special Elite', monospace;
+  font-size: 0.85rem;
+  color: #a28a62;
+  line-height: 1.2;
+  position: relative;
+}
+
+.glossary-text {
+  flex-shrink: 0;
+  font-weight: 400;
+  text-transform: capitalize;
+}
+
+.glossary-dots {
+  flex: 1;
+  height: 1px;
+  background-image: repeating-linear-gradient(
+    to right,
+    #a28a62 0,
+    #a28a62 2px,
+    transparent 2px,
+    transparent 6px
+  );
+  margin: 0 0.6rem;
+  position: relative;
+  top: -1px;
+}
+
+.glossary-page {
+  flex-shrink: 0;
+  font-weight: 700;
+  min-width: 18px;
+  text-align: right;
+}
+
+/* Responsive glossary styles */
+@media (max-width: 768px) {
+  .glossary-content {
+    padding: 1.5rem 1.2rem 1rem 1.2rem;
+  }
+  
+  .glossary-title {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .glossary-item {
+    font-size: 0.75rem;
+  }
+  
+  .glossary-list {
+    gap: 0.5rem;
+  }
+  
+  .glossary-dots {
+    margin: 0 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .glossary-content {
+    padding: 1rem 0.8rem 0.8rem 0.8rem;
+  }
+  
+  .glossary-title {
+    font-size: 1rem;
+    margin-bottom: 0.8rem;
+  }
+  
+  .glossary-item {
+    font-size: 0.65rem;
+  }
+  
+  .glossary-list {
+    gap: 0.4rem;
+  }
+  
+  .glossary-dots {
+    margin: 0 0.4rem;
+  }
+  
+  .glossary-page {
+    min-width: 15px;
+  }
+}
+
+/* About Me Page Styles */
+.about-content {
+  padding: 1.5rem 1.8rem 1rem 1.8rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.about-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.2rem;
+}
+
+.about-image {
+  margin-bottom: 0.8rem;
+}
+
+.profile-pic {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #a28a62;
+  box-shadow: 0 2px 8px rgba(162, 138, 98, 0.3);
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Fallback when image fails to load */
+.profile-pic:before {
+  content: "👤";
+  font-size: 2rem;
+  color: #a28a62;
+}
+
+.about-title {
+  font-family: 'Special Elite', 'Courier Prime', monospace;
+  font-size: 1.0rem;
+  font-weight: 400;
+  color: #a28a62;
+  margin: 0;
+  text-align: center;
+  text-transform: lowercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #a28a62;
+  padding-bottom: 0.3rem;
+}
+
+.about-title-clickable {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.about-title-clickable:hover {
+  background: rgba(162, 138, 98, 0.2);
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(162, 138, 98, 0.3);
+  border-color: rgba(162, 138, 98, 0.6);
+}
+
+.about-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+
+.about-text p {
+  font-family: 'Courier Prime', 'Special Elite', monospace;
+  font-size: 0.6rem;
+  color: #a28a62;
+  line-height: 1.4;
+  margin: 0;
+  text-align: justify;
+  hyphens: auto;
+  word-spacing: -0.5px;
+}
+
+/* Responsive about styles */
+@media (max-width: 768px) {
+  .about-content {
+    padding: 1.2rem 1.5rem 0.8rem 1.5rem;
+  }
+  
+  .profile-pic {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .about-title {
+    font-size: 1.1rem;
+  }
+  
+  .about-text p {
+    font-size: 0.65rem;
+    line-height: 1.35;
+  }
+  
+  .about-header {
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-content {
+    padding: 1rem 1.2rem 0.6rem 1.2rem;
+  }
+  
+  .profile-pic {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .about-title {
+    font-size: 1rem;
+  }
+  
+  .about-text p {
+    font-size: 0.6rem;
+    line-height: 1.3;
+  }
+  
+  .about-header {
+    margin-bottom: 0.8rem;
+  }
+  
+  .about-image {
+    margin-bottom: 0.6rem;
+  }
+}
+
+/* About Me Highlight Styles */
+.about-highlight {
+  background: linear-gradient(120deg, rgba(162, 138, 98, 0.3) 0%, rgba(162, 138, 98, 0.1) 100%);
+  padding: 2px 4px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  display: inline;
+  border: 1px solid rgba(162, 138, 98, 0.2);
+}
+
+.about-highlight:hover {
+  background: rgba(162, 138, 98, 0.4);
+  transform: scale(1.02);
+  box-shadow: 0 2px 6px rgba(162, 138, 98, 0.3);
+  border-color: rgba(162, 138, 98, 0.4);
+}
+
+/* Journey Page Styles */
+.journey-content {
+  padding: 1.5rem 1.8rem 1rem 1.8rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.journey-title {
+  font-family: 'Special Elite', 'Courier Prime', monospace;
+  font-size: 1.0rem;
+  font-weight: 400;
+  color: #a28a62;
+  margin: 0 0 1rem 0;
+  text-align: center;
+  text-transform: lowercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #a28a62;
+  padding-bottom: 0.3rem;
+}
+
+.journey-title-clickable {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.journey-title-clickable:hover {
+  background: rgba(162, 138, 98, 0.2);
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(162, 138, 98, 0.3);
+  border-color: rgba(162, 138, 98, 0.6);
+}
+
+.journey-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+
+.journey-text p {
+  font-family: 'Courier Prime', 'Special Elite', monospace;
+  font-size: 0.58rem;
+  color: #a28a62;
+  line-height: 1.35;
+  margin: 0;
+  text-align: justify;
+  hyphens: auto;
+  word-spacing: -0.3px;
+}
+
+/* Responsive Journey styles */
+@media (max-width: 768px) {
+  .journey-content {
+    padding: 1.2rem 1.5rem 0.8rem 1.5rem;
+  }
+  
+  .journey-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
+  }
+  
+  .journey-text p {
+    font-size: 0.62rem;
+    line-height: 1.4;
+  }
+}
+
+@media (max-width: 480px) {
+  .journey-content {
+    padding: 1rem 1.2rem 0.6rem 1.2rem;
+  }
+  
+  .journey-title {
+    font-size: 1rem;
+    margin-bottom: 0.6rem;
+  }
+  
+  .journey-text p {
+    font-size: 0.58rem;
+    line-height: 1.3;
+  }
+}
+
+/* Mobile Arrow Navigation Styles */
+.mobile-nav-container {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 12px 20px;
+  border-radius: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: none; /* Hidden by default */
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  z-index: 1000;
+}
+
+/* Hide navigation on desktop and larger screens */
+@media (min-width: 769px) {
+  .mobile-nav-container {
+    display: none !important;
+  }
+}
+
+.nav-btn {
+  background: hsl(0, 0%, 3%);
+  border: none;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: white;
+}
+
+.nav-btn:hover {
+  background: hsl(0, 0%, 62%);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(201, 201, 201, 0.4);
+}
+
+.nav-btn:active {
+  transform: scale(0.95);
+}
+
+.nav-btn:disabled {
+  background: hsl(0, 0%, 30%);
+  color: hsl(0, 0%, 50%);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.nav-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.page-info {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.9rem;
+  color: hsl(0, 0%, 80%);
+  font-weight: 500;
+  min-width: 60px;
+  text-align: center;
+}
+
+.current-page {
+  color: hsl(0, 0%, 100%);
+  font-weight: 700;
+}
+
+/* Show navigation only on mobile */
+@media (max-width: 768px) {
+  .mobile-nav-container {
+    display: flex;
+  }
+  
+  /* Better mobile book positioning */
+  .book {
+    height: 75vmin;
+    width: 55vmin;
+    transform: translate(-50%, -60%) scale(0.9);
+  }
+  
+  /* Adjust body height for mobile */
+  body {
+    height: 100vh;
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 480px) {
+  .mobile-nav-container {
+    bottom: 15px;
+    padding: 10px 15px;
+    gap: 15px;
+  }
+  
+  .nav-btn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .nav-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .page-info {
+    font-size: 0.8rem;
+    min-width: 50px;
+  }
+  
+  .book {
+    height: 70vmin;
+    width: 50vmin;
+    transform: translate(-50%, -55%) scale(0.85);
+  }
+}
+
+/* Flying Content Overlay Styles */
+.flying-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  z-index: 2000;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.flying-overlay.active {
+  display: flex;
+  opacity: 1;
+}
+
+.flying-content {
+  position: fixed !important; /* Use fixed instead of absolute for consistent positioning */
+  right: 5% !important; /* Consistent right position */
+  top: 50% !important;
+  transform: translateY(-50%) translateX(100%);
+  width: 420px;
+  max-width: 35%;
+  background: rgba(0, 0, 0, 0.95);
+  border: 2px solid #a28a62;
+  border-radius: 15px;
+  padding: 2rem;
+  box-sizing: border-box;
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  max-height: 80vh;
+  overflow-y: auto;
+  margin-top: 0;
+  z-index: 2500; /* Ensure it's above other elements */
+}
+
+/* Make sure the active state transform is consistent */
+.flying-overlay.active .flying-content {
+  transform: translateY(-50%) translateX(0) !important;
+}
+
+.close-flying-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: #a28a62;
+  border: none;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  transition: all 0.3s ease;
+  z-index: 2001;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.close-flying-btn:hover {
+  background: #b59973;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(162, 138, 98, 0.6);
+}
+
+.close-flying-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Flying Glossary Content Styles */
+.flying-glossary {
+  color: white;
+}
+
+.flying-glossary-title {
+  font-family: 'Special Elite', 'Courier Prime', monospace;
+  font-size: 1.8rem;
+  font-weight: 400;
+  color: white;
+  margin: 0 0 2rem 0;
+  text-align: center;
+  text-transform: lowercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid #a28a62;
+  padding-bottom: 0.8rem;
+}
+
+.flying-glossary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.flying-glossary-item {
+  display: flex;
+  align-items: center;
+  font-family: 'Courier Prime', 'Special Elite', monospace;
+  font-size: 1.1rem;
+  color: white;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0.5rem;
+  border-radius: 8px;
+}
+
+.flying-glossary-item:hover {
+  background: rgba(162, 138, 98, 0.2);
+  transform: translateX(10px);
+}
+
+.flying-glossary-text {
+  flex-shrink: 0;
+  font-weight: 400;
+  text-transform: capitalize;
+}
+
+.flying-glossary-dots {
+  flex: 1;
+  height: 1px;
+  background-image: repeating-linear-gradient(
+    to right,
+    white 0,
+    white 3px,
+    transparent 3px,
+    transparent 10px
+  );
+  margin: 0 1rem;
+  position: relative;
+  top: -2px;
+}
+
+.flying-glossary-page {
+  flex-shrink: 0;
+  font-weight: 700;
+  min-width: 25px;
+  text-align: right;
+  color: #a28a62;
+}
+
+/* Ensure tablet maintains the same position strategy */
+@media (max-width: 768px) {
+  .flying-content {
+    right: 5% !important;
+    width: 380px;
+    max-width: 40%;
+  }
+}
+  
+  .flying-overlay.active .flying-content {
+    transform: translateY(-50%) translateX(0);
+  }
+  
+  .flying-glossary-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .flying-glossary-item {
+    font-size: 1rem;
+    gap: 1rem;
+  }
+  
+  .flying-glossary-list {
+    gap: 1rem;
+  }
+
+
+/* Only change position strategy for mobile */
+@media (max-width: 480px) {
+  .flying-content {
+    right: 50% !important;
+    transform: translateY(-50%) translateX(100%);
+    width: 90%;
+    max-width: 90%;
+  }
+  
+  .flying-overlay.active .flying-content {
+    transform: translateY(-50%) translateX(50%) !important;
+  }
+}
+  
+  .flying-glossary-title {
+    font-size: 1.3rem;
+    margin-bottom: 1.2rem;
+  }
+  
+  .flying-glossary-item {
+    font-size: 0.9rem;
+  }
+  
+  .flying-glossary-list {
+    gap: 0.8rem;
+  }
+
+
+/* Flying About Me Content Styles */
+.flying-about {
+  color: white;
+}
+
+.flying-about-title {
+  font-family: 'Special Elite', 'Courier Prime', monospace;
+  font-size: 1.8rem;
+  font-weight: 400;
+  color: white;
+  margin: 0 0 2rem 0;
+  text-align: center;
+  text-transform: lowercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid #a28a62;
+  padding-bottom: 0.8rem;
+}
+
+.flying-about-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.flying-about-item {
+  display: flex;
+  align-items: flex-start;
+  font-family: 'Courier Prime', 'Special Elite', monospace;
+  font-size: 1rem;
+  color: white;
+  line-height: 1.4;
+  padding: 0.4rem;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.flying-about-item:hover {
+  background: rgba(162, 138, 98, 0.15);
+  transform: translateX(8px);
+}
+
+.flying-about-bullet {
+  color: #a28a62;
+  font-size: 1.2rem;
+  margin-right: 0.8rem;
+  flex-shrink: 0;
+  font-weight: bold;
+}
+
+.flying-about-text {
+  flex: 1;
+  font-weight: 400;
+}
+
+/* Responsive Flying About Content */
+@media (max-width: 768px) {
+  .flying-about-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .flying-about-item {
+    font-size: 0.9rem;
+  }
+  
+  .flying-about-list {
+    gap: 0.8rem;
+  }
+  
+  .flying-about-bullet {
+    margin-right: 0.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .flying-about-title {
+    font-size: 1.3rem;
+    margin-bottom: 1.2rem;
+  }
+  
+  .flying-about-item {
+    font-size: 0.85rem;
+  }
+  
+  .flying-about-list {
+    gap: 0.7rem;
+  }
+  
+  .flying-about-bullet {
+    margin-right: 0.5rem;
+    font-size: 1rem;
+  }
+}
+
+/* Flying Full Content Styles */
+.flying-full-content {
+  color: white;
+}
+
+.flying-full-title {
+  font-family: 'Special Elite', 'Courier Prime', monospace;
+  font-size: 2rem;
+  font-weight: 400;
+  color: white;
+  margin: 0 0 2rem 0;
+  text-align: center;
+  text-transform: capitalize;
+  letter-spacing: 0.05em;
+  border-bottom: 3px solid #a28a62;
+  padding-bottom: 1rem;
+}
+
+.flying-full-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.flying-full-section {
+  background: rgba(162, 138, 98, 0.1);
+  padding: 1.2rem;
+  border-radius: 10px;
+  border-left: 4px solid #a28a62;
+  transition: all 0.3s ease;
+}
+
+.flying-full-section:hover {
+  background: rgba(162, 138, 98, 0.2);
+  transform: translateX(5px);
+}
+
+.flying-section-heading {
+  font-family: 'Special Elite', 'Courier Prime', monospace;
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: #a28a62;
+  margin: 0 0 0.8rem 0;
+  text-transform: lowercase;
+  letter-spacing: 0.03em;
+}
+
+.flying-section-content {
+  font-family: 'Courier Prime', 'Special Elite', monospace;
+  font-size: 0.95rem;
+  color: white;
+  line-height: 1.6;
+  margin: 0;
+  text-align: justify;
+}
+
+.flying-full-footer {
+  text-align: center;
+  padding-top: 1.5rem;
+  border-top: 2px solid #a28a62;
+}
+
+.flying-footer-text {
+  font-family: 'Special Elite', 'Courier Prime', monospace;
+  font-size: 1.1rem;
+  color: #a28a62;
+  font-style: italic;
+  margin: 0;
+}
+
+/* Responsive Flying Full Content */
+@media (max-width: 768px) {
+  .flying-full-title {
+    font-size: 1.6rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .flying-full-sections {
+    gap: 1.2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .flying-full-section {
+    padding: 1rem;
+  }
+  
+  .flying-section-heading {
+    font-size: 1.1rem;
+    margin-bottom: 0.6rem;
+  }
+  
+  .flying-section-content {
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  
+  .flying-footer-text {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .flying-full-title {
+    font-size: 1.4rem;
+    margin-bottom: 1.2rem;
+  }
+  
+  .flying-full-sections {
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+  }
+  
+  .flying-full-section {
+    padding: 0.8rem;
+  }
+  
+  .flying-section-heading {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .flying-section-content {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  
+  .flying-footer-text {
+    font-size: 0.9rem;
+  }
+}
+
+/* Flying Journey Content Styles */
+.flying-journey {
+  color: white;
+}
+
+.flying-journey-title {
+  font-family: 'Special Elite', 'Courier Prime', monospace;
+  font-size: 2.2rem;
+  font-weight: 400;
+  color: white;
+  margin: 0 0 2.5rem 0;
+  text-align: center;
+  text-transform: lowercase;
+  letter-spacing: 0.05em;
+  border-bottom: 3px solid #a28a62;
+  padding-bottom: 1rem;
+  position: relative;
+}
+
+.flying-journey-title::after {
+  content: '✨';
+  position: absolute;
+  right: -30px;
+  top: -10px;
+  font-size: 1.5rem;
+}
+
+.flying-journey-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+  margin-bottom: 2rem;
+}
+
+.flying-journey-section {
+  background: linear-gradient(135deg, rgba(162, 138, 98, 0.1) 0%, rgba(162, 138, 98, 0.05) 100%);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(162, 138, 98, 0.3);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s ease;
+  animation: fadeInUp 0.8s ease forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.flying-journey-section:hover {
+  background: linear-gradient(135deg, rgba(162, 138, 98, 0.2) 0%, rgba(162, 138, 98, 0.1) 100%);
+  transform: translateX(8px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(162, 138, 98, 0.3);
+}
+
+.flying-journey-section::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #a28a62 0%, rgba(162, 138, 98, 0.3) 100%);
+  transition: width 0.4s ease;
+}
+
+.flying-journey-section:hover::before {
+  width: 8px;
+}
+
+.flying-journey-section-title {
+  font-family: 'Special Elite', 'Courier Prime', monospace;
+  font-size: 1.3rem;
+  font-weight: 400;
+  color: #a28a62;
+  margin: 0 0 1rem 0;
+  text-transform: lowercase;
+  letter-spacing: 0.03em;
+  position: relative;
+}
+
+.flying-journey-section-text {
+  font-family: 'Courier Prime', 'Special Elite', monospace;
+  font-size: 1rem;
+  color: white;
+  line-height: 1.7;
+  margin: 0;
+  text-align: justify;
+}
+
+.flying-journey-footer {
+  text-align: center;
+  padding-top: 2rem;
+  border-top: 2px solid rgba(162, 138, 98, 0.5);
+  margin-top: 1rem;
+}
+
+.flying-journey-quote {
+  font-family: 'Special Elite', 'Courier Prime', monospace;
+  font-size: 1.3rem;
+  color: #a28a62;
+  font-style: italic;
+  margin: 0;
+  position: relative;
+  display: inline-block;
+}
+
+.flying-journey-quote::before,
+.flying-journey-quote::after {
+  content: '"';
+  font-size: 2rem;
+  color: rgba(162, 138, 98, 0.6);
+  position: absolute;
+  top: -10px;
+}
+
+.flying-journey-quote::before {
+  left: -20px;
+}
+
+.flying-journey-quote::after {
+  right: -20px;
+}
+
+/* Responsive Flying Journey Content */
+@media (max-width: 768px) {
+  .flying-journey-title {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+  }
+  
+  .flying-journey-title::after {
+    right: -25px;
+    top: -8px;
+    font-size: 1.3rem;
+  }
+  
+  .flying-journey-content {
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .flying-journey-section {
+    padding: 1.2rem;
+  }
+  
+  .flying-journey-section-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
+  }
+  
+  .flying-journey-section-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  
+  .flying-journey-quote {
+    font-size: 1.1rem;
+  }
+  
+  .flying-journey-quote::before,
+  .flying-journey-quote::after {
+    font-size: 1.8rem;
+    top: -8px;
+  }
+  
+  .flying-journey-quote::before {
+    left: -15px;
+  }
+  
+  .flying-journey-quote::after {
+    right: -15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .flying-journey-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .flying-journey-title::after {
+    right: -20px;
+    top: -6px;
+    font-size: 1.1rem;
+  }
+  
+  .flying-journey-content {
+    gap: 1.2rem;
+    margin-bottom: 1.2rem;
+  }
+  
+  .flying-journey-section {
+    padding: 1rem;
+  }
+  
+  .flying-journey-section-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.6rem;
+  }
+  
+  .flying-journey-section-text {
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  
+  .flying-journey-quote {
+    font-size: 1rem;
+  }
+  
+  .flying-journey-quote::before,
+  .flying-journey-quote::after {
+    font-size: 1.6rem;
+    top: -6px;
+  }
+  
+  .flying-journey-quote::before {
+    left: -12px;
+  }
+  
+  .flying-journey-quote::after {
+    right: -12px;
+  }
+}
+
+/* Skills Page Styles */
+.skills-content {
+  padding: 1.5rem 1.8rem 1rem 1.8rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.skills-title {
+  font-family: 'Special Elite', 'Courier Prime', monospace;
+  font-size: 1.0rem;
+  font-weight: 400;
+  color: #a28a62;
+  margin: 0 0 1.2rem 0;
+  text-align: center;
+  text-transform: lowercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #a28a62;
+  padding-bottom: 0.3rem;
+}
+
+.skills-title-clickable {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.skills-title-clickable:hover {
+  background: rgba(162, 138, 98, 0.2);
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(162, 138, 98, 0.3);
+  border-color: rgba(162, 138, 98, 0.6);
+}
+
+.skills-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  gap: 0.8rem;
+}
+
+.skills-item {
+  font-family: 'Courier Prime', 'Special Elite', monospace;
+  font-size: 0.75rem;
+  color: #a28a62;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  position: relative;
+  border: 1px solid transparent;
+}
+
+.skills-item:hover {
+  background: rgba(162, 138, 98, 0.15);
+  transform: translateX(8px);
+  border-color: rgba(162, 138, 98, 0.3);
+  box-shadow: 0 2px 6px rgba(162, 138, 98, 0.2);
+}
+
+.skills-text {
+  font-weight: 400;
+  text-transform: capitalize;
+}
+
+/* Responsive Skills styles */
+@media (max-width: 768px) {
+  .skills-content {
+    padding: 1.2rem 1.5rem 0.8rem 1.5rem;
+  }
+  
+  .skills-title {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .skills-item {
+    font-size: 0.8rem;
+  }
+  
+  .skills-list {
+    gap: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .skills-content {
+    padding: 1rem 1.2rem 0.6rem 1.2rem;
+  }
+  
+  .skills-title {
+    font-size: 1rem;
+    margin-bottom: 0.8rem;
+  }
+  
+  .skills-item {
+    font-size: 0.75rem;
+  }
+  
+  .skills-list {
+    gap: 0.6rem;
+  }
+}
+
+/* Flying Skills Content Styles */
+.flying-skills {
+  color: white;
+}
+
+.flying-skills-title {
+  font-family: 'Special Elite', 'Courier Prime', monospace;
+  font-size: 2rem;
+  font-weight: 400;
+  color: white;
+  margin: 0 0 2rem 0;
+  text-align: center;
+  text-transform: lowercase;
+  letter-spacing: 0.05em;
+  border-bottom: 3px solid #a28a62;
+  padding-bottom: 1rem;
+}
+
+.flying-skills-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.flying-skills-section {
+  background: rgba(162, 138, 98, 0.1);
+  padding: 1.2rem;
+  border-radius: 10px;
+  border-left: 4px solid #a28a62;
+  transition: all 0.3s ease;
+}
+
+.flying-skills-section:hover {
+  background: rgba(162, 138, 98, 0.2);
+  transform: translateX(5px);
+}
+
+.flying-section-heading {
+  font-family: 'Special Elite', 'Courier Prime', monospace;
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: #a28a62;
+  margin: 0 0 0.8rem 0;
+  text-transform: capitalize;
+  letter-spacing: 0.03em;
+}
+
+.flying-section-description {
+  font-family: 'Courier Prime', 'Special Elite', monospace;
+  font-size: 0.95rem;
+  color: white;
+  line-height: 1.6;
+  margin: 0 0 1rem 0;
+  text-align: justify;
+}
+
+.flying-section-tools {
+  font-family: 'Courier Prime', 'Special Elite', monospace;
+  font-size: 0.85rem;
+  color: #a28a62;
+  line-height: 1.4;
+  margin: 0;
+  font-style: italic;
+}
+
+.flying-section-tools strong {
+  color: white;
+  font-style: normal;
+}
+
+/* Responsive Flying Skills Content */
+@media (max-width: 768px) {
+  .flying-skills-title {
+    font-size: 1.6rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .flying-skills-sections {
+    gap: 1.2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .flying-skills-section {
+    padding: 1rem;
+  }
+  
+  .flying-section-heading {
+    font-size: 1.1rem;
+    margin-bottom: 0.6rem;
+  }
+  
+  .flying-section-description {
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  
+  .flying-section-tools {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .flying-skills-title {
+    font-size: 1.4rem;
+    margin-bottom: 1.2rem;
+  }
+  
+  .flying-skills-sections {
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+  }
+  
+  .flying-skills-section {
+    padding: 0.8rem;
+  }
+  
+  .flying-section-heading {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .flying-section-description {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  
+  .flying-section-tools {
+    font-size: 0.75rem;
+  }
+}
+
+/* Projects Page Styles */
+.page-title {
+  font-family: 'Special Elite', 'Courier Prime', monospace;
+  font-size: 1.0rem;
+  font-weight: 400;
+  color: #a28a62;
+  margin: 0 0 1.2rem 0;
+  text-align: center;
+  text-transform: lowercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #a28a62;
+  padding-bottom: 0.3rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.page-title:hover {
+  background: rgba(162, 138, 98, 0.2);
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(162, 138, 98, 0.3);
+  border-color: rgba(162, 138, 98, 0.6);
+}
+
+.projects-content {
+  padding: 1.5rem 1.8rem 1rem 1.8rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  gap: 1.2rem;
+}
+
+.project-title {
+  font-family: 'Courier Prime', 'Special Elite', monospace;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #a28a62;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0.6rem;
+  text-align: left;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+}
+
+.project-title:hover {
+  background: rgba(162, 138, 98, 0.1);
+  transform: translateX(8px);
+  color: #b59973;
+}
+
+/* Responsive Projects styles */
+@media (max-width: 768px) {
+  .projects-content {
+    padding: 1.2rem 1.5rem 0.8rem 1.5rem;
+    gap: 1rem;
+  }
+  
+  .project-title {
+    font-size: 0.75rem;
+    padding: 0.5rem;
+  }
+  
+  .page-title {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .projects-content {
+    padding: 1rem 1.2rem 0.6rem 1.2rem;
+    gap: 0.8rem;
+  }
+  
+  .project-title {
+    font-size: 0.7rem;
+    padding: 0.4rem;
+  }
+  
+  .page-title {
+    font-size: 1rem;
+    margin-bottom: 0.8rem;
+  }
+}
+
+/* Flying Projects Content Styles */
+.flying-projects {
+  color: white;
+}
+
+.flying-projects-title {
+  font-family: 'Special Elite', 'Courier Prime', monospace;
+  font-size: 2rem;
+  font-weight: 400;
+  color: white;
+  margin: 0 0 2rem 0;
+  text-align: center;
+  text-transform: capitalize;
+  letter-spacing: 0.05em;
+  border-bottom: 3px solid #a28a62;
+  padding-bottom: 1rem;
+}
+
+.flying-projects-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.flying-projects-section {
+  background: rgba(162, 138, 98, 0.1);
+  padding: 1.2rem;
+  border-radius: 10px;
+  border-left: 4px solid #a28a62;
+  transition: all 0.3s ease;
+}
+
+.flying-projects-section:hover {
+  background: rgba(162, 138, 98, 0.2);
+  transform: translateX(5px);
+}
+
+.flying-project-links {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(162, 138, 98, 0.3);
+}
+
+.flying-project-link {
+  font-family: 'Special Elite', 'Courier Prime', monospace;
+  font-size: 0.9rem;
+  color: #a28a62;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border: 1px solid #a28a62;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+}
+
+.flying-project-link:hover {
+  background: #a28a62;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(162, 138, 98, 0.3);
+}
+
+/* Responsive Flying Projects Content */
+@media (max-width: 768px) {
+  .flying-projects-title {
+    font-size: 1.6rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .flying-projects-sections {
+    gap: 1.2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .flying-projects-section {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .flying-projects-title {
+    font-size: 1.4rem;
+    margin-bottom: 1.2rem;
+  }
+  
+  .flying-projects-sections {
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+  }
+  
+  .flying-project-links {
+    gap: 0.8rem;
+    margin-top: 0.8rem;
+    padding-top: 0.8rem;
+    flex-direction: column;
+  }
+  
+  .flying-project-link {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
+
+/* Web Development Page Styles */
+.web-dev-content {
+  padding: 1.5rem 1.8rem 1rem 1.8rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  gap: 0.8rem;
+}
+
+.web-dev-item {
+  font-family: 'Courier Prime', 'Special Elite', monospace;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #a28a62;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0.5rem;
+  text-align: left;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+  border-left: 2px solid transparent;
+}
+
+.web-dev-item:hover {
+  background: rgba(162, 138, 98, 0.1);
+  transform: translateX(8px);
+  color: #b59973;
+  border-left-color: #a28a62;
+}
+
+/* Responsive Web Development styles */
+@media (max-width: 768px) {
+  .web-dev-content {
+    padding: 1.2rem 1.5rem 0.8rem 1.5rem;
+    gap: 0.7rem;
+  }
+  
+  .web-dev-item {
+    font-size: 0.7rem;
+    padding: 0.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .web-dev-content {
+    padding: 1rem 1.2rem 0.6rem 1.2rem;
+    gap: 0.6rem;
+  }
+  
+  .web-dev-item {
+    font-size: 0.65rem;
+    padding: 0.3rem;
+  }
+}
+
+/* Design Portfolio Page Styles */
+.design-content {
+  padding: 1.5rem 1.8rem 1rem 1.8rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  gap: 0.8rem;
+}
+
+.design-item {
+  font-family: 'Courier Prime', 'Special Elite', monospace;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #a28a62;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0.5rem;
+  text-align: left;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+  border-left: 2px solid transparent;
+}
+
+.design-item:hover {
+  background: rgba(162, 138, 98, 0.1);
+  transform: translateX(8px);
+  color: #b59973;
+  border-left-color: #a28a62;
+}
+
+/* Responsive Design Portfolio styles */
+@media (max-width: 768px) {
+  .design-content {
+    padding: 1.2rem 1.5rem 0.8rem 1.5rem;
+    gap: 0.7rem;
+  }
+  
+  .design-item {
+    font-size: 0.7rem;
+    padding: 0.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .design-content {
+    padding: 1rem 1.2rem 0.6rem 1.2rem;
+    gap: 0.6rem;
+  }
+  
+  .design-item {
+    font-size: 0.65rem;
+    padding: 0.3rem;
+  }
+}
+
+/* Flying Design Portfolio Content Styles */
+.flying-design {
+  color: white;
+}
+
+.flying-design-title {
+  font-family: 'Special Elite', 'Courier Prime', monospace;
+  font-size: 2rem;
+  font-weight: 400;
+  color: white;
+  margin: 0 0 2rem 0;
+  text-align: center;
+  text-transform: capitalize;
+  letter-spacing: 0.05em;
+  border-bottom: 3px solid #a28a62;
+  padding-bottom: 1rem;
+}
+
+.flying-design-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.flying-design-section {
+  background: rgba(162, 138, 98, 0.1);
+  padding: 1.2rem;
+  border-radius: 10px;
+  border-left: 4px solid #a28a62;
+  transition: all 0.3s ease;
+}
+
+.flying-design-section:hover {
+  background: rgba(162, 138, 98, 0.2);
+  transform: translateX(5px);
+}
+
+/* Responsive Flying Design Portfolio Content */
+@media (max-width: 768px) {
+  .flying-design-title {
+    font-size: 1.6rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .flying-design-sections {
+    gap: 1.2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .flying-design-section {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .flying-design-title {
+    font-size: 1.4rem;
+    margin-bottom: 1.2rem;
+  }
+  
+  .flying-design-sections {
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+  }
+  
+  .flying-design-section {
+    padding: 0.8rem;
+  }
+}
